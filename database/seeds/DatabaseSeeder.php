@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $userQuantity = 200;
         $categoryQuantity = 30;
         $productQuantity = 1000;
+        $transactionQuantity = 200;
       
         // Set the factories
         factory(User::class, $userQuantity)->create();
