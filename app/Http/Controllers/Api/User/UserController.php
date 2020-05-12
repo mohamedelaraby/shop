@@ -1,4 +1,4 @@
-<?php
+]<?php
 
 namespace App\Http\Controllers\Api\User;
 
@@ -60,7 +60,9 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        // $customer = Customer::where('id',$id)->firstOrFail();
+
+        $user = User::where('id',$id)->firstOrFail();
 
         return response()->json(['data'=>$user],200);
     }
