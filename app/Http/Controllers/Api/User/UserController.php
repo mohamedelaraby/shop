@@ -1,4 +1,4 @@
-]<?php
+<?php
 
 namespace App\Http\Controllers\Api\User;
 
@@ -76,9 +76,55 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(User $user)
     {
-        //
+        //Validate user
+        $rules = [
+            'email' => 'email|unique:users,email,'.$user->id,
+            'password'=>'min:6|confirmed',
+            'admin'=>'in:'.User::ADMIN_USER. ',' . User::REGULAR_USER,
+        ];
+
+        // Check for user info
+        if(request()->has('name')){
+            $user->name = request('name');
+        }
+
+        // if user has new email then 
+        //1-user become unverified. 
+        //2- Generate new verifiaction token 
+        //3- Update user email
+        if(request()->has('email') && $user->email != request('email')){
+            $user->verified = User::UNVERIFIED_USER;
+            $user->verification_token = User::generateVerificationCode();
+            $user->email = request('email');
+        }
+
+        // If user has password then encrypt new one
+        if(request()->has('password')){
+            $user->password = bcrypt(request('password'));
+        }
+
+        // If user is verified and has admin #then update admin column
+        if(request()->has('admin')){
+            if(!$user->isVerified()){
+                return response()->json(['error' => 'NOT allowed','code' =>409],409);
+            }
+
+            $user->admin = request('admin');
+        }
+
+        // If user info is changed then update user
+
+        if(!$user->isDirty()){
+            return response()->json(['error'=>' Update values to MODIFY the user','code'=>422],422);
+        }
+
+        // Update user
+        $user->save();
+
+        // Return ok 200 response
+         return response()->json(['data'=>$user],200);
     }
 
     /**
